@@ -99,7 +99,10 @@ class GmsCoreHooks extends PackageHooks {
             var l = createUsesPerms(
                     Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                     Manifest.permission.READ_PHONE_NUMBERS,
-                    Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+                    Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+                    // used for installing Android Device Policy app during setup of a
+                    // Google-managed work profile
+                    Manifest.permission.REQUEST_INSTALL_PACKAGES
             );
             res.addAll(l);
             return res;

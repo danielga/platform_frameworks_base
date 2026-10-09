@@ -151,8 +151,8 @@ public class InstallStart extends Activity {
                 && checkPermission(Manifest.permission.INSTALL_PACKAGES, /* pid= */ -1,
                 originatingUid) == PackageManager.PERMISSION_GRANTED;
 
-        // Bypass the unknown source user restrictions check when either of the following
-        // two conditions is met:
+        // Bypass the unknown source user restrictions check when any of the following
+        // conditions is met:
         // 1. An installer with the INSTALL_PACKAGES permission initiated the
         // installation via the PackageInstaller APIs and not via an
         // ACTION_VIEW or ACTION_INSTALL_PACKAGE intent.
@@ -161,8 +161,12 @@ public class InstallStart extends Activity {
         final boolean isIntentInstall =
                 Intent.ACTION_VIEW.equals(intentAction)
                         || Intent.ACTION_INSTALL_PACKAGE.equals(intentAction);
+        // 3. The installer is the admin app or the app store of a work profile, see
+        // ManagedProfileTrustedInstallers
         final boolean isTrustedSource =
-                (!isIntentInstall && isInstallPkgPermissionGranted) || isPrivilegedAndKnown;
+                (!isIntentInstall && isInstallPkgPermissionGranted) || isPrivilegedAndKnown
+                        || ManagedProfileTrustedInstallers.isTrustedSessionInstaller(this,
+                                sourceInfo, originatingUid, isIntentInstall);
 
         // In general case, the originatingUid is callingUid. If callingUid is INVALID_UID, return
         // InstallAborted in the check above. When the originatingUid is INVALID_UID here, it means

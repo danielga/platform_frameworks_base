@@ -46,6 +46,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".ManagedProfilePlayInstaller"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".v2.ui.InstallLaunch"
             android:excludeFromRecents="true"
             android:exported="false" />

@@ -49,6 +49,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.android.packageinstaller.ManagedProfileTrustedInstallers
 import com.android.packageinstaller.common.EventResultPersister
 import com.android.packageinstaller.common.EventResultPersister.OutOfIdsException
 import com.android.packageinstaller.common.InstallEventReceiver
@@ -280,8 +281,8 @@ class InstallRepository(private val context: Context) : EventResultPersister.Eve
         val isInstallPkgPermissionGranted = originatingUid != Process.INVALID_UID &&
                 isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, originatingUid)
 
-        // Bypass the unknown source user restrictions check when either of the following
-        // two conditions is met:
+        // Bypass the unknown source user restrictions check when any of the following
+        // conditions is met:
         // 1. An installer with the INSTALL_PACKAGES permission initiated the
         // installation via the PackageInstaller APIs and not via an
         // ACTION_VIEW or ACTION_INSTALL_PACKAGE intent.
@@ -291,8 +292,13 @@ class InstallRepository(private val context: Context) : EventResultPersister.Eve
             Intent.ACTION_VIEW == intent.action
                     || Intent.ACTION_INSTALL_PACKAGE == intent.action
 
+        // 3. The installer is the admin app or the app store of a work profile, see
+        // ManagedProfileTrustedInstallers
         isTrustedSource =
             (!isIntentInstall && isInstallPkgPermissionGranted) || isPrivilegedAndKnown
+                    || ManagedProfileTrustedInstallers.isTrustedSessionInstaller(
+                        context, sourceInfo, originatingUid, isIntentInstall
+                    )
 
         // In general case, the originatingUid is callingUid. If callingUid is INVALID_UID, return
         // InstallAborted in the check above. When the originatingUid is INVALID_UID here, it means
